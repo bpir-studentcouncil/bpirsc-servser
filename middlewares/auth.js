@@ -2,7 +2,7 @@ import admin from 'firebase-admin';
 import { dbClient } from '../utils/dbClient.js';
 
 // Initialize firebase-admin if FB_SERVICE_KEY is configured
-let isFirebaseAdminInitialized = false;
+export let isFirebaseAdminInitialized = false;
 if (process.env.FB_SERVICE_KEY) {
   try {
     const decodedKey = Buffer.from(process.env.FB_SERVICE_KEY, 'base64').toString('utf-8');

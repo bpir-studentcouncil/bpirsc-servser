@@ -4,6 +4,7 @@ import express from 'express';
 import cors from 'cors';
 import morgan from 'morgan';
 import { connectDB, isDemoMode, getConnectionStatus } from './utils/dbClient.js';
+import { isFirebaseAdminInitialized } from './middlewares/auth.js';
 
 // Route imports
 import userRoutes from './routes/userRoutes.js';
@@ -49,6 +50,7 @@ app.get('/', (req, res) => {
     status: 'online',
     message: 'BPIRSC API Server is running smoothly',
     mode: isDemoMode ? 'Demo Mode (Local JSON Storage)' : 'Production Mode (MongoDB Connected)',
+    firebaseAdminInitialized: isFirebaseAdminInitialized,
     dbStatus: getConnectionStatus()
   });
 });
