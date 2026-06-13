@@ -11,6 +11,15 @@ router.get('/', async (req, res) => {
   try {
     let newsList = await dbClient.news.find();
     
+    // Fetch all users to build a name-to-photo mapping
+    const users = await dbClient.users.find();
+    const userPhotoMap = {};
+    users.forEach(u => {
+      if (u.name) {
+        userPhotoMap[u.name.toLowerCase()] = u.profilePhoto;
+      }
+    });
+    
     // Filter in code for compatibility between Mongoose and Mock JSON client
     if (featured === 'true') {
       newsList = newsList.filter(item => item.isFeatured === true);
@@ -28,7 +37,16 @@ router.get('/', async (req, res) => {
       );
     }
 
-    res.json(newsList);
+    // Attach authorPhoto dynamically
+    const updatedNewsList = newsList.map(item => {
+      const authorPhoto = item.authorPhoto || (item.authorName ? userPhotoMap[item.authorName.toLowerCase()] : '');
+      return {
+        ...item,
+        authorPhoto: authorPhoto || ''
+      };
+    });
+
+    res.json(updatedNewsList);
   } catch (error) {
     console.error('Error fetching news:', error);
     res.status(500).json({ message: 'Error fetching news' });
@@ -42,7 +60,20 @@ router.get('/:id', async (req, res) => {
     if (!newsItem) {
       return res.status(404).json({ message: 'News article not found' });
     }
-    res.json(newsItem);
+    
+    // Find the author's profile photo
+    let authorPhoto = newsItem.authorPhoto || '';
+    if (!authorPhoto && newsItem.authorName) {
+      const author = await dbClient.users.findOne({ name: newsItem.authorName });
+      if (author) {
+        authorPhoto = author.profilePhoto || '';
+      }
+    }
+
+    res.json({
+      ...newsItem,
+      authorPhoto
+    });
   } catch (error) {
     console.error('Error fetching news detail:', error);
     res.status(500).json({ message: 'Error fetching news details' });
@@ -65,6 +96,7 @@ router.post('/', authenticateUser, requireAdmin, async (req, res) => {
       coverImage: coverImage || 'https://images.unsplash.com/photo-1506784983877-45594efa4cbe?auto=format&fit=crop&w=800&q=80',
       authorName: req.user.name,
       authorRole: req.user.role === 'admin' ? 'Admin' : req.user.role === 'alumni' ? 'Alumni' : 'Student',
+      authorPhoto: req.user.profilePhoto || '',
       isFeatured: isFeatured === true || isFeatured === 'true',
       publishedAt: new Date()
     });
