@@ -177,44 +177,7 @@ const seedMockData = () => {
 
   const teamFile = 'team.json';
   if (readMockData(teamFile).length === 0) {
-    writeMockData(teamFile, [
-      {
-        _id: 'team_1',
-        name: "Engr. Monirul Islam",
-        position: "Advisor & Mentor",
-        dept: "Computer Technology",
-        photo: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=400&h=400&q=80",
-        bio: "Academic council chair with over 12 years of instructing polytechnic graduates on CAD drafting, networking, and industry practices.",
-        social: { facebook: "https://facebook.com/monirul.islam.bpirsc", linkedin: "https://linkedin.com/in/monirul-islam-bpirsc", twitter: "" }
-      },
-      {
-        _id: 'team_2',
-        name: "Sabbir Ahmed",
-        position: "President",
-        dept: "Mechanical Technology",
-        photo: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=400&h=400&q=80",
-        bio: "Automations programmer and lead AutoCAD coordinator. Passionate about empowering students through code and hardware collaborations.",
-        social: { facebook: "https://facebook.com/sabbir.ahmed.bpirsc", linkedin: "https://linkedin.com/in/sabbir-ahmed-bpirsc", twitter: "https://twitter.com/sabbir_bpirsc" }
-      },
-      {
-        _id: 'team_3',
-        name: "Nusrat Jahan",
-        position: "General Secretary",
-        dept: "Computer Technology",
-        photo: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=400&h=400&q=80",
-        bio: "Full Stack JavaScript developer. Manages administrative communications and organises quarterly tech seminars and blood campaigns.",
-        social: { facebook: "https://facebook.com/nusrat.jahan.bpirsc", linkedin: "https://linkedin.com/in/nusrat-jahan-bpirsc", twitter: "" }
-      },
-      {
-        _id: 'team_4',
-        name: "Kamrul Hasan",
-        position: "Alumni Coordinator",
-        dept: "Civil Technology",
-        photo: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=400&h=400&q=80",
-        bio: "Site manager at a top local construction firm. Facilitates alumni referrals, job openings, and industrial placement programs.",
-        social: { facebook: "", linkedin: "https://linkedin.com/in/kamrul-hasan-bpirsc", twitter: "" }
-      }
-    ]);
+    writeMockData(teamFile, []);
   }
 };
 
@@ -250,51 +213,7 @@ const getProjectsCol = () => db.collection('projects');
 const getContactsCol = () => db.collection('contacts');
 const getTeamMembersCol = () => db.collection('teamMembers');
 
-const seedMongoTeamData = async () => {
-  try {
-    const col = getTeamMembersCol();
-    const count = await col.countDocuments();
-    if (count === 0) {
-      await col.insertMany([
-        {
-          name: 'Engr. Monirul Islam',
-          position: 'Advisor & Mentor',
-          dept: 'Computer Technology',
-          photo: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=400&h=400&q=80',
-          bio: 'Academic council chair with over 12 years of instructing polytechnic graduates on CAD drafting, networking, and industry practices.',
-          social: { facebook: 'https://facebook.com/monirul.islam.bpirsc', linkedin: 'https://linkedin.com/in/monirul-islam-bpirsc', twitter: '' }
-        },
-        {
-          name: 'Sabbir Ahmed',
-          position: 'President',
-          dept: 'Mechanical Technology',
-          photo: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=400&h=400&q=80',
-          bio: 'Automations programmer and lead AutoCAD coordinator. Passionate about empowering students through code and hardware collaborations.',
-          social: { facebook: 'https://facebook.com/sabbir.ahmed.bpirsc', linkedin: 'https://linkedin.com/in/sabbir-ahmed-bpirsc', twitter: 'https://twitter.com/sabbir_bpirsc' }
-        },
-        {
-          name: 'Nusrat Jahan',
-          position: 'General Secretary',
-          dept: 'Computer Technology',
-          photo: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=400&h=400&q=80',
-          bio: 'Full Stack JavaScript developer. Manages administrative communications and organises quarterly tech seminars and blood campaigns.',
-          social: { facebook: 'https://facebook.com/nusrat.jahan.bpirsc', linkedin: 'https://linkedin.com/in/nusrat-jahan-bpirsc', twitter: '' }
-        },
-        {
-          name: 'Kamrul Hasan',
-          position: 'Alumni Coordinator',
-          dept: 'Civil Technology',
-          photo: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=400&h=400&q=80',
-          bio: 'Site manager at a top local construction firm. Facilitates alumni referrals, job openings, and industrial placement programs.',
-          social: { facebook: '', linkedin: 'https://linkedin.com/in/kamrul-hasan-bpirsc', twitter: '' }
-        }
-      ]);
-      console.log('🌱 Seeded default team members in MongoDB.');
-    }
-  } catch (err) {
-    console.error('Failed to seed MongoDB team members:', err);
-  }
-};
+// seedMongoTeamData function removed because the team section is now fully dynamic.
 
 const seedMongoNewsData = async () => {
   try {
@@ -427,7 +346,17 @@ export const connectDB = async () => {
         const uriDbName = process.env.MONGO_URI.split('/').pop().split('?')[0];
         db = client.db(uriDbName || 'bpirsc_db');
         console.log('⚡ Connected to MongoDB Atlas successfully using MongoClient.');
-        await seedMongoTeamData();
+        
+        // Purge existing default team members from live database
+        try {
+          await db.collection('teamMembers').deleteMany({
+            name: { $in: ['Engr. Monirul Islam', 'Sabbir Ahmed', 'Nusrat Jahan', 'Kamrul Hasan'] }
+          });
+          console.log('🧹 Purged existing default team members from MongoDB.');
+        } catch (purgeErr) {
+          console.error('Failed to purge existing default team members:', purgeErr);
+        }
+
         await seedMongoNewsData();
         await seedMongoProjectsData();
         return true;
