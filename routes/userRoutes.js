@@ -28,6 +28,11 @@ router.post('/sync', async (req, res) => {
       });
       return res.status(201).json(user);
     }
+
+    // Update profile photo in MongoDB if it is empty or updated in Firebase
+    if (profilePhoto && user.profilePhoto !== profilePhoto) {
+      user = await dbClient.users.findByIdAndUpdate(user._id, { profilePhoto }, { new: true });
+    }
     
     res.json(user);
   } catch (error) {
