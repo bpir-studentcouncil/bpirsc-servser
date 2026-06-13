@@ -17,7 +17,7 @@ router.get('/', async (req, res) => {
 
 // Admin only: Add a new team member
 router.post('/', authenticateUser, requireAdmin, async (req, res) => {
-  const { name, position, dept, photo, bio, facebook, linkedin, twitter } = req.body;
+  const { name, position, dept, photo, bio, facebook, linkedin, twitter, instagram } = req.body;
 
   if (!name || !position || !dept || !bio) {
     return res.status(400).json({ message: 'Name, position, department, and bio are required fields.' });
@@ -33,7 +33,8 @@ router.post('/', authenticateUser, requireAdmin, async (req, res) => {
       social: {
         facebook: facebook || '',
         linkedin: linkedin || '',
-        twitter: twitter || ''
+        twitter: twitter || '',
+        instagram: instagram || ''
       }
     });
     res.status(201).json(newMember);
@@ -46,7 +47,7 @@ router.post('/', authenticateUser, requireAdmin, async (req, res) => {
 // Admin only: Update a team member's details
 router.put('/:id', authenticateUser, requireAdmin, async (req, res) => {
   const { id } = req.params;
-  const { name, position, dept, photo, bio, facebook, linkedin, twitter } = req.body;
+  const { name, position, dept, photo, bio, facebook, linkedin, twitter, instagram } = req.body;
 
   if (!name || !position || !dept || !bio) {
     return res.status(400).json({ message: 'Name, position, department, and bio are required fields.' });
@@ -62,7 +63,8 @@ router.put('/:id', authenticateUser, requireAdmin, async (req, res) => {
       social: {
         facebook: facebook || '',
         linkedin: linkedin || '',
-        twitter: twitter || ''
+        twitter: twitter || '',
+        instagram: instagram || ''
       }
     };
     
