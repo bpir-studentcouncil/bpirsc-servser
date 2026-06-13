@@ -1,26 +1,8 @@
-import admin from 'firebase-admin';
 import { dbClient } from '../utils/dbClient.js';
 
-// Initialize firebase-admin if FB_SERVICE_KEY is configured
-export let isFirebaseAdminInitialized = false;
-export let firebaseAdminError = null;
-if (process.env.FB_SERVICE_KEY) {
-  try {
-    const decodedKey = Buffer.from(process.env.FB_SERVICE_KEY, 'base64').toString('utf-8');
-    const serviceAccount = JSON.parse(decodedKey);
-    admin.initializeApp({
-      credential: admin.cert(serviceAccount)
-    });
-    isFirebaseAdminInitialized = true;
-    console.log('🔥 Firebase Admin SDK initialized successfully.');
-  } catch (err) {
-    console.error('❌ Failed to initialize Firebase Admin SDK:', err.message);
-    firebaseAdminError = err.message;
-  }
-} else {
-  console.warn('⚠️ FB_SERVICE_KEY not configured. Firebase Admin verification will be skipped for mock bypass.');
-  firebaseAdminError = 'FB_SERVICE_KEY not configured in process.env';
-}
+// Firebase Admin SDK disabled per user request
+export const isFirebaseAdminInitialized = false;
+export const firebaseAdminError = 'Firebase Admin SDK disabled by user request';
 
 export const authenticateUser = async (req, res, next) => {
   try {
@@ -31,27 +13,16 @@ export const authenticateUser = async (req, res, next) => {
 
     const token = authHeader.split(' ')[1];
     
-    let uid = token;
+    // Without Firebase Admin SDK, the client passes the raw user uid directly in the Authorization header
+    const uid = token;
     let email = req.headers['x-user-email'] || '';
     let name = req.headers['x-user-name'] || '';
-
-    // Verify token using Firebase Admin if initialized and it is not a mock token
-    if (isFirebaseAdminInitialized && !token.startsWith('mock-uid-')) {
-      try {
-        const decoded = await admin.auth().verifyIdToken(token);
-        uid = decoded.uid;
-        email = decoded.email || '';
-        name = decoded.name || email.split('@')[0] || '';
-      } catch (err) {
-        return res.status(401).json({ message: 'Unauthorized: Invalid Firebase ID token', error: err.message });
-      }
-    }
 
     // Look up the corresponding user record in our database.
     const user = await dbClient.users.findOne({ uid });
     
     if (!user) {
-      // Create user on the fly if email is available (either from Firebase ID token or headers fallback)
+      // Create user on the fly if email is available (either from headers fallback)
       if (email) {
         const newUser = await dbClient.users.create({
           uid,
