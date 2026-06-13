@@ -122,14 +122,14 @@ router.put('/:id/status', authenticateUser, requireAdmin, async (req, res) => {
 
     const updatedRequest = await dbClient.alumni.findByIdAndUpdate(id, { status }, { new: true });
 
-    // If approved, sync user role in users collection to 'alumni'
+    // If approved, sync user role in users collection to 'alumni' (unless they are already an admin)
     if (status === 'approved') {
       const user = await dbClient.users.findOne({ uid: request.uid });
-      if (user) {
+      if (user && user.role !== 'admin') {
         await dbClient.users.findByIdAndUpdate(user._id, { role: 'alumni' });
       }
     } else {
-      // If rejected/reset, change user role back to student
+      // If rejected/reset, change user role back to student (unless they are already an admin)
       const user = await dbClient.users.findOne({ uid: request.uid });
       if (user && user.role === 'alumni') {
         await dbClient.users.findByIdAndUpdate(user._id, { role: 'student' });
