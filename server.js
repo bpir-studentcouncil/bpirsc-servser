@@ -66,12 +66,10 @@ app.use((err, req, res, next) => {
 });
 
 // Start Server
-if (!process.env.VERCEL) {
-  app.listen(PORT, () => {
-    console.log(`🚀 BPIRSC Server listening on port ${PORT}`);
-    console.log(`🌐 API status: http://localhost:${PORT}/`);
-  });
-}
+app.listen(PORT, () => {
+  console.log(`🚀 BPIRSC Server listening on port ${PORT}`);
+  console.log(`🌐 API status: http://localhost:${PORT}/`);
+});
 
 export default app;
 
