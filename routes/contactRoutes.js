@@ -63,4 +63,22 @@ router.put('/:id/read', authenticateUser, requireAdmin, async (req, res) => {
   }
 });
 
+// Admin Only: Delete a contact message
+router.delete('/:id', authenticateUser, requireAdmin, async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const deletedMessage = await dbClient.contacts.findByIdAndDelete(id);
+
+    if (!deletedMessage) {
+      return res.status(404).json({ message: 'Message not found' });
+    }
+
+    res.json({ message: 'Message deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting contact message:', error);
+    res.status(500).json({ message: 'Server error deleting message' });
+  }
+});
+
 export default router;
