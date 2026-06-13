@@ -1,0 +1,73 @@
+[
+  {
+    "_id": "proj_1",
+    "title": "Free AutoCAD Mastery Course",
+    "description": "A 4-week certificate course aiming to cover 2D and 3D modeling fundamentals, rendering, and design layout practices.",
+    "coverImage": "https://images.unsplash.com/photo-1504917595217-d4dc5ebe6122?auto=format&fit=crop&w=800&q=80",
+    "gallery": [
+      "https://images.unsplash.com/photo-1581092334247-433a9255628a?auto=format&fit=crop&w=800&q=80",
+      "https://images.unsplash.com/photo-1531403009284-440f080d1e12?auto=format&fit=crop&w=800&q=80"
+    ],
+    "startDate": "2026-05-01",
+    "endDate": "2026-05-30",
+    "status": "Completed",
+    "projectType": "AutoCAD Course",
+    "teamMembers": [
+      {
+        "name": "Sabbir Ahmed",
+        "role": "Lead Instructor"
+      },
+      {
+        "name": "Nusrat Jahan",
+        "role": "Coordinator"
+      }
+    ],
+    "challenges": "Managing large lab sizes and limited licensing software setup.",
+    "outcomes": "Over 120 students certified with practical skills in architectural mapping.",
+    "isFeatured": true
+  },
+  {
+    "_id": "proj_2",
+    "title": "Blood Donation Camp 2026",
+    "description": "Voluntary blood drive organized in association with Sandhani Rajshahi Medical College, targeting polytechnic students.",
+    "coverImage": "https://images.unsplash.com/photo-1615461066841-6116e61058f4?auto=format&fit=crop&w=800&q=80",
+    "gallery": [],
+    "startDate": "2026-06-10",
+    "endDate": "2026-06-11",
+    "status": "Completed",
+    "projectType": "Blood Donation Campaigns",
+    "teamMembers": [
+      {
+        "name": "Tanvir Hossain",
+        "role": "Volunteer Lead"
+      }
+    ],
+    "challenges": "Coordinating blood testing kits and maintaining hygiene protocols.",
+    "outcomes": "Collected 75+ bags of blood to aid local hospital emergencies.",
+    "isFeatured": false
+  },
+  {
+    "_id": "proj_3",
+    "title": "Innovative Smart Home IoT Project",
+    "description": "A collaborative hardware development project designing cost-effective IoT nodes for power management and smart switches.",
+    "coverImage": "https://images.unsplash.com/photo-1558002038-1055907df827?auto=format&fit=crop&w=800&q=80",
+    "gallery": [],
+    "startDate": "2026-06-01",
+    "endDate": "2026-07-15",
+    "status": "Ongoing",
+    "projectType": "Technical Workshops",
+    "teamMembers": [
+      {
+        "name": "Fahim Faisal",
+        "role": "IoT Architect"
+      },
+      {
+        "name": "Rimi Sen",
+        "role": "Embedded Developer"
+      }
+    ],
+    "challenges": "High cost of specialized microcontrollers and sensors locally.",
+    "outcomes": "Working prototype is 80% complete and will be showcased at the local science fair.",
+    "isFeatured": true
+  }
+]

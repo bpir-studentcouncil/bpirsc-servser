@@ -1,0 +1,58 @@
+[
+  {
+    "_id": "user_admin",
+    "uid": "mock-uid-admin",
+    "email": "admin@bpirsc.org",
+    "name": "BPIRSC Executive Admin",
+    "role": "admin",
+    "createdAt": "2026-06-12T15:58:00.661Z"
+  },
+  {
+    "_id": "user_student",
+    "uid": "mock-uid-student",
+    "email": "student@bpirsc.org",
+    "name": "Adnan Sami",
+    "role": "student",
+    "createdAt": "2026-06-12T15:58:00.661Z"
+  },
+  {
+    "_id": "user_alumni",
+    "uid": "mock-uid-alumni",
+    "email": "alumni@bpirsc.org",
+    "name": "Engr. Mahbubul Alam",
+    "role": "alumni",
+    "createdAt": "2026-06-12T15:58:00.661Z"
+  },
+  {
+    "_id": "tlr2xx9df",
+    "uid": "FZ9og3jgi3QVldC4Lu09iJmKznf1",
+    "email": "testalumni@gmail.com",
+    "name": "Test Alumni",
+    "role": "student",
+    "createdAt": "2026-06-12T16:17:19.888Z"
+  },
+  {
+    "_id": "6gsx1sgng",
+    "uid": "D1ysfuaMzxey0U885HAZdMSMv3Y2",
+    "email": "fardinsojon@gmail.com",
+    "name": "Fardin Rahman Sojon",
+    "role": "student",
+    "createdAt": "2026-06-12T16:28:52.418Z"
+  },
+  {
+    "_id": "w50ya37oj",
+    "uid": "nJUzESYYnBgdtE6qIqcXHvjRxgl1",
+    "email": "sojoneditz25@gmail.com",
+    "name": "Fardin Rahman Sojon",
+    "role": "student",
+    "createdAt": "2026-06-12T16:51:49.317Z"
+  },
+  {
+    "_id": "zbkeq3cve",
+    "uid": "bGL2Fcc9ezM6TaixTDgHHtntCHD3",
+    "email": "testuser@example.com",
+    "name": "Test User",
+    "role": "student",
+    "createdAt": "2026-06-12T16:57:01.609Z"
+  }
+]

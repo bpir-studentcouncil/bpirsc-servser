@@ -1,0 +1,35 @@
+[
+  {
+    "_id": "news_1",
+    "title": "BPIRSC Organizing AutoCAD Fundamental Workshop",
+    "content": "We are excited to announce our upcoming hands-on workshop on AutoCAD fundamentals. This workshop is designed for architecture and engineering students who want to kickstart their designing journey. Register online by next Monday!",
+    "category": "Technical Education News",
+    "coverImage": "https://images.unsplash.com/photo-1581092334247-433a9255628a?auto=format&fit=crop&w=800&q=80",
+    "authorName": "Rashedul Islam",
+    "authorRole": "Admin",
+    "publishedAt": "2026-06-10T15:58:00.658Z",
+    "isFeatured": true
+  },
+  {
+    "_id": "news_2",
+    "title": "Scholarship Opportunities for Polytechnic Students in Japan",
+    "content": "MEXT Japan offers scholarship programs for diploma engineering students. Find the list of eligible fields, language prerequisites, and submission steps inside. Application closes on July 30.",
+    "category": "Scholarship Information",
+    "coverImage": "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?auto=format&fit=crop&w=800&q=80",
+    "authorName": "Dr. M. A. Rahman",
+    "authorRole": "Alumni",
+    "publishedAt": "2026-06-07T15:58:00.659Z",
+    "isFeatured": false
+  },
+  {
+    "_id": "news_3",
+    "title": "Academic Notice: Midterm Exam Schedule Released",
+    "content": "Official notice from the BPIR Student Council academic section: Midterm examinations will commence from June 25, 2026. Please collect your admit card from the department office.",
+    "category": "Notice Board",
+    "coverImage": "https://images.unsplash.com/photo-1506784983877-45594efa4cbe?auto=format&fit=crop&w=800&q=80",
+    "authorName": "System Notice",
+    "authorRole": "Admin",
+    "publishedAt": "2026-06-12T15:58:00.659Z",
+    "isFeatured": false
+  }
+]
