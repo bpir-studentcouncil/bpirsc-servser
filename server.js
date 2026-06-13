@@ -20,8 +20,32 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 // Apply Middlewares
+const allowedOrigins = [
+  'https://bpirsc-web.netlify.app',
+  'http://localhost:5173',
+  'http://127.0.0.1:5173',
+  'http://localhost:3000'
+];
+
 app.use(cors({
-  origin: process.env.DOMAIN_URL || '*', // Restrict to DOMAIN_URL if defined, otherwise allow all for development
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl/Postman requests)
+    if (!origin) return callback(null, true);
+    
+    // Check if the origin matches any in allowedOrigins list or DOMAIN_URL env var
+    const domainUrl = process.env.DOMAIN_URL;
+    if (allowedOrigins.indexOf(origin) !== -1 || (domainUrl && origin === domainUrl)) {
+      return callback(null, true);
+    }
+    
+    // Proactively allow any localhost/127.0.0.1 sub-port for local dev ease
+    if (/^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin)) {
+      return callback(null, true);
+    }
+    
+    const msg = `The CORS policy for this site does not allow access from the specified Origin: ${origin}`;
+    return callback(new Error(msg), false);
+  },
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization', 'x-user-email', 'x-user-name']
 }));
