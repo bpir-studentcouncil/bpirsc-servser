@@ -30,7 +30,7 @@ router.post('/', authenticateUser, requireAdmin, async (req, res) => {
       dept,
       photo: photo || 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=400&h=400&q=80',
       bio,
-      sortOrder: sortOrder !== undefined ? Number(sortOrder) : 0,
+      sortOrder: Number(sortOrder) || 1,
       social: {
         facebook: facebook || '',
         linkedin: linkedin || '',
@@ -61,7 +61,7 @@ router.put('/:id', authenticateUser, requireAdmin, async (req, res) => {
       dept,
       photo: photo || 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=400&h=400&q=80',
       bio,
-      sortOrder: sortOrder !== undefined ? Number(sortOrder) : 0,
+      sortOrder: Number(sortOrder) || 1,
       social: {
         facebook: facebook || '',
         linkedin: linkedin || '',

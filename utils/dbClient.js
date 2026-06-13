@@ -357,6 +357,17 @@ export const connectDB = async () => {
           console.error('Failed to purge existing default team members:', purgeErr);
         }
 
+        // Migrate existing team members with missing/0 sortOrder to 1
+        try {
+          await db.collection('teamMembers').updateMany(
+            { $or: [ { sortOrder: { $exists: false } }, { sortOrder: 0 } ] },
+            { $set: { sortOrder: 1 } }
+          );
+          console.log('🔄 Deployed sortOrder default migration (default to 1) on teamMembers.');
+        } catch (migErr) {
+          console.error('Failed to migrate teamMembers sortOrder:', migErr);
+        }
+
         await seedMongoNewsData();
         await seedMongoProjectsData();
         return true;
@@ -582,7 +593,7 @@ export const dbClient = {
     ...createMockOps('team.json'),
     find: async (query = {}) => {
       const data = readMockData('team.json');
-      return data.sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0));
+      return data.sort((a, b) => (a.sortOrder || 1) - (b.sortOrder || 1));
     }
   }
 };
