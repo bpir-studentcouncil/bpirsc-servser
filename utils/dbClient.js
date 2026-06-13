@@ -231,6 +231,16 @@ const client = new MongoClient(process.env.MONGO_URI || 'mongodb://localhost:270
 });
 
 let db;
+let dbConnectionError = null;
+
+export const getConnectionStatus = () => {
+  return {
+    connected: !!db,
+    error: dbConnectionError,
+    dbName: db ? db.databaseName : null,
+    isDemoMode
+  };
+};
 
 // Getter functions for collections
 const getUsersCol = () => db.collection('users');
@@ -413,6 +423,7 @@ export const connectDB = async () => {
     await seedMongoProjectsData();
     return true;
   } catch (error) {
+    dbConnectionError = error.message;
     console.error('❌ MongoDB Connection Error:', error.message);
     console.log('🔄 Falling back to DEMO MODE with local JSON storage.');
     seedMockData();
