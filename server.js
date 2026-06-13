@@ -90,9 +90,16 @@ app.use((err, req, res, next) => {
 });
 
 // Start Server
-app.listen(PORT, () => {
-  console.log(`🚀 BPIRSC Server listening on port ${PORT}`);
-  console.log(`🌐 API status: http://localhost:${PORT}/`);
+connectDB().then(() => {
+  app.listen(PORT, () => {
+    console.log(`🚀 BPIRSC Server listening on port ${PORT}`);
+    console.log(`🌐 API status: http://localhost:${PORT}/`);
+  });
+}).catch((err) => {
+  console.error('Database connection failed on startup:', err);
+  app.listen(PORT, () => {
+    console.log(`🚀 BPIRSC Server listening on port ${PORT} (fallback mode)`);
+  });
 });
 
 export default app;
