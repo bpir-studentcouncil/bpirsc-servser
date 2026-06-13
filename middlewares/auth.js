@@ -3,6 +3,7 @@ import { dbClient } from '../utils/dbClient.js';
 
 // Initialize firebase-admin if FB_SERVICE_KEY is configured
 export let isFirebaseAdminInitialized = false;
+export let firebaseAdminError = null;
 if (process.env.FB_SERVICE_KEY) {
   try {
     const decodedKey = Buffer.from(process.env.FB_SERVICE_KEY, 'base64').toString('utf-8');
@@ -14,9 +15,11 @@ if (process.env.FB_SERVICE_KEY) {
     console.log('🔥 Firebase Admin SDK initialized successfully.');
   } catch (err) {
     console.error('❌ Failed to initialize Firebase Admin SDK:', err.message);
+    firebaseAdminError = err.message;
   }
 } else {
   console.warn('⚠️ FB_SERVICE_KEY not configured. Firebase Admin verification will be skipped for mock bypass.');
+  firebaseAdminError = 'FB_SERVICE_KEY not configured in process.env';
 }
 
 export const authenticateUser = async (req, res, next) => {
