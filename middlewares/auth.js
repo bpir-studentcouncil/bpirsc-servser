@@ -9,7 +9,7 @@ if (process.env.FB_SERVICE_KEY) {
     const decodedKey = Buffer.from(process.env.FB_SERVICE_KEY, 'base64').toString('utf-8');
     const serviceAccount = JSON.parse(decodedKey);
     admin.initializeApp({
-      credential: admin.credential.cert(serviceAccount)
+      credential: admin.cert(serviceAccount)
     });
     isFirebaseAdminInitialized = true;
     console.log('🔥 Firebase Admin SDK initialized successfully.');
