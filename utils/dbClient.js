@@ -14,7 +14,11 @@ import TeamMember from '../models/TeamMember.js';
 
 // Setup directories for Mock JSON storage
 const __dirname = path.resolve();
-const MOCK_DIR = path.join(__dirname, 'mock_data');
+const isVercel = process.env.VERCEL || process.env.NOW_BUILDER;
+const MOCK_DIR = isVercel 
+  ? path.join('/tmp', 'mock_data') 
+  : path.join(__dirname, 'mock_data');
+
 if (!fs.existsSync(MOCK_DIR)) {
   fs.mkdirSync(MOCK_DIR, { recursive: true });
 }
