@@ -27,8 +27,11 @@ app.use(cors({
 app.use(express.json({ limit: '10mb' }));
 app.use(morgan('dev'));
 
-// Database Connection
-connectDB();
+// Database Connection Middleware (ensures MongoDB is connected before handling requests)
+app.use(async (req, res, next) => {
+  await connectDB();
+  next();
+});
 
 // API Routes mounting
 app.use('/api/users', userRoutes);

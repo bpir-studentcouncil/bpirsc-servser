@@ -407,28 +407,41 @@ const seedMongoProjectsData = async () => {
   }
 };
 
+let dbConnectionPromise = null;
+
 export const connectDB = async () => {
   if (isDemoMode) {
+    if (dbConnectionPromise) return true;
     console.log('⚠️  MONGO_URI not specified. Running server in DEMO MODE with local JSON storage.');
     seedMockData();
+    dbConnectionPromise = true;
     return true;
   }
-  try {
-    await client.connect();
-    const uriDbName = process.env.MONGO_URI.split('/').pop().split('?')[0];
-    db = client.db(uriDbName || 'bpirsc_db');
-    console.log('⚡ Connected to MongoDB Atlas successfully using MongoClient.');
-    await seedMongoTeamData();
-    await seedMongoNewsData();
-    await seedMongoProjectsData();
+  if (db) {
     return true;
-  } catch (error) {
-    dbConnectionError = error.message;
-    console.error('❌ MongoDB Connection Error:', error.message);
-    console.log('🔄 Falling back to DEMO MODE with local JSON storage.');
-    seedMockData();
-    return false;
   }
+  if (!dbConnectionPromise) {
+    dbConnectionPromise = (async () => {
+      try {
+        await client.connect();
+        const uriDbName = process.env.MONGO_URI.split('/').pop().split('?')[0];
+        db = client.db(uriDbName || 'bpirsc_db');
+        console.log('⚡ Connected to MongoDB Atlas successfully using MongoClient.');
+        await seedMongoTeamData();
+        await seedMongoNewsData();
+        await seedMongoProjectsData();
+        return true;
+      } catch (error) {
+        dbConnectionError = error.message;
+        console.error('❌ MongoDB Connection Error:', error.message);
+        console.log('🔄 Falling back to DEMO MODE with local JSON storage.');
+        seedMockData();
+        dbConnectionPromise = null; // Reset promise so it retries
+        return false;
+      }
+    })();
+  }
+  return dbConnectionPromise;
 };
 
 // Helper mock operations generator
