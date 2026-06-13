@@ -17,7 +17,7 @@ router.get('/', async (req, res) => {
 
 // Admin only: Add a new team member
 router.post('/', authenticateUser, requireAdmin, async (req, res) => {
-  const { name, position, dept, photo, bio, facebook, linkedin, twitter, instagram } = req.body;
+  const { name, position, dept, photo, bio, facebook, linkedin, twitter, instagram, sortOrder } = req.body;
 
   if (!name || !position || !dept || !bio) {
     return res.status(400).json({ message: 'Name, position, department, and bio are required fields.' });
@@ -30,6 +30,7 @@ router.post('/', authenticateUser, requireAdmin, async (req, res) => {
       dept,
       photo: photo || 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=400&h=400&q=80',
       bio,
+      sortOrder: sortOrder !== undefined ? Number(sortOrder) : 0,
       social: {
         facebook: facebook || '',
         linkedin: linkedin || '',
@@ -47,7 +48,7 @@ router.post('/', authenticateUser, requireAdmin, async (req, res) => {
 // Admin only: Update a team member's details
 router.put('/:id', authenticateUser, requireAdmin, async (req, res) => {
   const { id } = req.params;
-  const { name, position, dept, photo, bio, facebook, linkedin, twitter, instagram } = req.body;
+  const { name, position, dept, photo, bio, facebook, linkedin, twitter, instagram, sortOrder } = req.body;
 
   if (!name || !position || !dept || !bio) {
     return res.status(400).json({ message: 'Name, position, department, and bio are required fields.' });
@@ -60,6 +61,7 @@ router.put('/:id', authenticateUser, requireAdmin, async (req, res) => {
       dept,
       photo: photo || 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=400&h=400&q=80',
       bio,
+      sortOrder: sortOrder !== undefined ? Number(sortOrder) : 0,
       social: {
         facebook: facebook || '',
         linkedin: linkedin || '',

@@ -577,7 +577,13 @@ export const dbClient = {
   
   teamMembers: !isDemoMode ? {
     ...mongoOps(getTeamMembersCol),
-    find: async (query = {}) => await getTeamMembersCol().find(query).sort({ createdAt: 1 }).toArray()
-  } : createMockOps('team.json')
+    find: async (query = {}) => await getTeamMembersCol().find(query).sort({ sortOrder: 1, name: 1 }).toArray()
+  } : {
+    ...createMockOps('team.json'),
+    find: async (query = {}) => {
+      const data = readMockData('team.json');
+      return data.sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0));
+    }
+  }
 };
 
