@@ -1,15 +1,8 @@
 import 'dotenv/config';
 import fs from 'fs';
-
 import path from 'path';
-import mongoose from 'mongoose';
+import { MongoClient, ServerApiVersion, ObjectId } from 'mongodb';
 
-import User from '../models/User.js';
-import Alumni from '../models/Alumni.js';
-import News from '../models/News.js';
-import Project from '../models/Project.js';
-import Contact from '../models/Contact.js';
-import TeamMember from '../models/TeamMember.js';
 
 
 // Setup directories for Mock JSON storage
@@ -228,11 +221,31 @@ const seedMockData = () => {
 // Mode configuration
 export const isDemoMode = !process.env.MONGO_URI;
 
+// MongoClient instance
+const client = new MongoClient(process.env.MONGO_URI || 'mongodb://localhost:27017', {
+  serverApi: {
+    version: ServerApiVersion.v1,
+    strict: true,
+    deprecationErrors: true,
+  }
+});
+
+let db;
+
+// Getter functions for collections
+const getUsersCol = () => db.collection('users');
+const getAlumniCol = () => db.collection('alumni');
+const getNewsCol = () => db.collection('news');
+const getProjectsCol = () => db.collection('projects');
+const getContactsCol = () => db.collection('contacts');
+const getTeamMembersCol = () => db.collection('teamMembers');
+
 const seedMongoTeamData = async () => {
   try {
-    const count = await TeamMember.countDocuments();
+    const col = getTeamMembersCol();
+    const count = await col.countDocuments();
     if (count === 0) {
-      await TeamMember.create([
+      await col.insertMany([
         {
           name: 'Engr. Monirul Islam',
           position: 'Advisor & Mentor',
@@ -275,9 +288,10 @@ const seedMongoTeamData = async () => {
 
 const seedMongoNewsData = async () => {
   try {
-    const count = await News.countDocuments();
+    const col = getNewsCol();
+    const count = await col.countDocuments();
     if (count === 0) {
-      await News.create([
+      await col.insertMany([
         {
           title: 'BPIRSC Organizing AutoCAD Fundamental Workshop',
           content: 'We are excited to announce our upcoming hands-on workshop on AutoCAD fundamentals. This workshop is designed for architecture and engineering students who want to kickstart their designing journey. Register online by next Monday!',
@@ -318,9 +332,10 @@ const seedMongoNewsData = async () => {
 
 const seedMongoProjectsData = async () => {
   try {
-    const count = await Project.countDocuments();
+    const col = getProjectsCol();
+    const count = await col.countDocuments();
     if (count === 0) {
-      await Project.create([
+      await col.insertMany([
         {
           title: 'Free AutoCAD Mastery Course',
           description: 'A 4-week certificate course aiming to cover 2D and 3D modeling fundamentals, rendering, and design layout practices.',
@@ -389,8 +404,10 @@ export const connectDB = async () => {
     return true;
   }
   try {
-    await mongoose.connect(process.env.MONGO_URI);
-    console.log('⚡ Connected to MongoDB Atlas successfully.');
+    await client.connect();
+    const uriDbName = process.env.MONGO_URI.split('/').pop().split('?')[0];
+    db = client.db(uriDbName || 'bpirsc_db');
+    console.log('⚡ Connected to MongoDB Atlas successfully using MongoClient.');
     await seedMongoTeamData();
     await seedMongoNewsData();
     await seedMongoProjectsData();
@@ -487,71 +504,127 @@ const createMockOps = (fileName) => {
   };
 };
 
+// Raw MongoDB Operations Wrapper
+const mongoOps = (collectionGetter) => {
+  return {
+    find: async (query = {}) => {
+      const col = collectionGetter();
+      return await col.find(query).toArray();
+    },
+    findOne: async (query = {}) => {
+      const col = collectionGetter();
+      return await col.findOne(query);
+    },
+    findById: async (id) => {
+      const col = collectionGetter();
+      try {
+        return await col.findOne({ _id: new ObjectId(id) });
+      } catch {
+        // Fallback for simple string ids if they aren't ObjectIds
+        try {
+          return await col.findOne({ _id: id });
+        } catch {
+          return null;
+        }
+      }
+    },
+    create: async (body) => {
+      const col = collectionGetter();
+      const newDoc = { ...body, createdAt: body.createdAt || new Date() };
+      const result = await col.insertOne(newDoc);
+      return { _id: result.insertedId, ...newDoc };
+    },
+    findByIdAndUpdate: async (id, updates, options = {}) => {
+      const col = collectionGetter();
+      try {
+        const updateDoc = (updates.$set || updates.$inc || updates.$push || updates.$pull) ? updates : { $set: updates };
+        
+        // Remove MongoDB internal _id from $set updates if it's there
+        if (updateDoc.$set && updateDoc.$set._id) {
+          delete updateDoc.$set._id;
+        }
+
+        let query = { _id: new ObjectId(id) };
+        let result = await col.findOneAndUpdate(
+          query,
+          updateDoc,
+          { returnDocument: 'after', ...options }
+        );
+
+        if (!result) {
+          // Try with string id fallback
+          query = { _id: id };
+          result = await col.findOneAndUpdate(
+            query,
+            updateDoc,
+            { returnDocument: 'after', ...options }
+          );
+        }
+
+        return result?.value || result || null;
+      } catch (err) {
+        console.error('Update failed:', err);
+        return null;
+      }
+    },
+    findByIdAndDelete: async (id) => {
+      const col = collectionGetter();
+      try {
+        let query = { _id: new ObjectId(id) };
+        const doc = await col.findOne(query);
+        if (doc) {
+          await col.deleteOne(query);
+          return doc;
+        }
+        
+        // Try with string id fallback
+        query = { _id: id };
+        const docString = await col.findOne(query);
+        if (docString) {
+          await col.deleteOne(query);
+          return docString;
+        }
+
+        return null;
+      } catch {
+        return null;
+      }
+    },
+    deleteOne: async (query = {}) => {
+      const col = collectionGetter();
+      return await col.deleteOne(query);
+    },
+    countDocuments: async (query = {}) => {
+      const col = collectionGetter();
+      return await col.countDocuments(query);
+    }
+  };
+};
+
 // Exportable DB clients
 export const dbClient = {
-  users: !isDemoMode ? {
-    find: (q) => User.find(q),
-    findOne: (q) => User.findOne(q),
-    findById: (id) => User.findById(id),
-    create: (body) => User.create(body),
-    findByIdAndUpdate: (id, up, opt) => User.findByIdAndUpdate(id, up, { new: true, ...opt }),
-    findByIdAndDelete: (id) => User.findByIdAndDelete(id),
-    deleteOne: (q) => User.deleteOne(q),
-    countDocuments: (q) => User.countDocuments(q)
-  } : createMockOps('users.json'),
-
-  alumni: !isDemoMode ? {
-    find: (q) => Alumni.find(q),
-    findOne: (q) => Alumni.findOne(q),
-    findById: (id) => Alumni.findById(id),
-    create: (body) => Alumni.create(body),
-    findByIdAndUpdate: (id, up, opt) => Alumni.findByIdAndUpdate(id, up, { new: true, ...opt }),
-    findByIdAndDelete: (id) => Alumni.findByIdAndDelete(id),
-    deleteOne: (q) => Alumni.deleteOne(q),
-    countDocuments: (q) => Alumni.countDocuments(q)
-  } : createMockOps('alumni.json'),
-
+  users: !isDemoMode ? mongoOps(getUsersCol) : createMockOps('users.json'),
+  
+  alumni: !isDemoMode ? mongoOps(getAlumniCol) : createMockOps('alumni.json'),
+  
   news: !isDemoMode ? {
-    find: (q) => News.find(q).sort({ publishedAt: -1 }),
-    findOne: (q) => News.findOne(q),
-    findById: (id) => News.findById(id),
-    create: (body) => News.create(body),
-    findByIdAndUpdate: (id, up, opt) => News.findByIdAndUpdate(id, up, { new: true, ...opt }),
-    findByIdAndDelete: (id) => News.findByIdAndDelete(id),
-    deleteOne: (q) => News.deleteOne(q),
-    countDocuments: (q) => News.countDocuments(q)
+    ...mongoOps(getNewsCol),
+    find: async (query = {}) => await getNewsCol().find(query).sort({ publishedAt: -1 }).toArray()
   } : createMockOps('news.json'),
-
+  
   projects: !isDemoMode ? {
-    find: (q) => Project.find(q).sort({ startDate: -1 }),
-    findOne: (q) => Project.findOne(q),
-    findById: (id) => Project.findById(id),
-    create: (body) => Project.create(body),
-    findByIdAndUpdate: (id, up, opt) => Project.findByIdAndUpdate(id, up, { new: true, ...opt }),
-    findByIdAndDelete: (id) => Project.findByIdAndDelete(id),
-    deleteOne: (q) => Project.deleteOne(q),
-    countDocuments: (q) => Project.countDocuments(q)
+    ...mongoOps(getProjectsCol),
+    find: async (query = {}) => await getProjectsCol().find(query).sort({ startDate: -1 }).toArray()
   } : createMockOps('projects.json'),
-
+  
   contacts: !isDemoMode ? {
-    find: (q) => Contact.find(q).sort({ createdAt: -1 }),
-    findOne: (q) => Contact.findOne(q),
-    findById: (id) => Contact.findById(id),
-    create: (body) => Contact.create(body),
-    findByIdAndUpdate: (id, up, opt) => Contact.findByIdAndUpdate(id, up, { new: true, ...opt }),
-    findByIdAndDelete: (id) => Contact.findByIdAndDelete(id),
-    deleteOne: (q) => Contact.deleteOne(q),
-    countDocuments: (q) => Contact.countDocuments(q)
+    ...mongoOps(getContactsCol),
+    find: async (query = {}) => await getContactsCol().find(query).sort({ createdAt: -1 }).toArray()
   } : createMockOps('contacts.json'),
-
+  
   teamMembers: !isDemoMode ? {
-    find: (q) => TeamMember.find(q).sort({ createdAt: 1 }),
-    findOne: (q) => TeamMember.findOne(q),
-    findById: (id) => TeamMember.findById(id),
-    create: (body) => TeamMember.create(body),
-    findByIdAndUpdate: (id, up, opt) => TeamMember.findByIdAndUpdate(id, up, { new: true, ...opt }),
-    findByIdAndDelete: (id) => TeamMember.findByIdAndDelete(id),
-    deleteOne: (q) => TeamMember.deleteOne(q),
-    countDocuments: (q) => TeamMember.countDocuments(q)
+    ...mongoOps(getTeamMembersCol),
+    find: async (query = {}) => await getTeamMembersCol().find(query).sort({ createdAt: 1 }).toArray()
   } : createMockOps('team.json')
 };
+
