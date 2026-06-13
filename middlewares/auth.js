@@ -1,4 +1,5 @@
 import admin from 'firebase-admin';
+import { getAuth } from 'firebase-admin/auth';
 import { dbClient } from '../utils/dbClient.js';
 
 // Initialize firebase-admin if FB_SERVICE_KEY is configured
@@ -38,7 +39,7 @@ export const authenticateUser = async (req, res, next) => {
     // Verify token using Firebase Admin if initialized and it is not a mock token
     if (isFirebaseAdminInitialized && !token.startsWith('mock-uid-')) {
       try {
-        const decoded = await admin.auth().verifyIdToken(token);
+        const decoded = await getAuth().verifyIdToken(token);
         uid = decoded.uid;
         email = decoded.email || '';
         name = decoded.name || email.split('@')[0] || '';
